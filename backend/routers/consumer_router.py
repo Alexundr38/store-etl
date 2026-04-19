@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends
-from starlette import status
+from fastapi import APIRouter, Depends, status
 from schemas import consumer_schema
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.db_config import get_db

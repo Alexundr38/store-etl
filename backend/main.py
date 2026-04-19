@@ -2,11 +2,13 @@ import uvicorn
 from fastapi import FastAPI
 
 from config import get_backend_port
-from routers import consumer_router
+from routers import consumer_router, category_router
 
 app = FastAPI()
 
 app.include_router(consumer_router.router)
+app.include_router(category_router.router)
+
 @app.get("/")
 async def root():
     return {"message": "API started"}
