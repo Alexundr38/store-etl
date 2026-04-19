@@ -215,7 +215,7 @@ class StoreItem(Base):
     )
 
 class Orders(Base):
-    __tablename__ = 'order'
+    __tablename__ = 'orders'
 
     order_id = Column(
         UUID(as_uuid=True),
@@ -257,7 +257,7 @@ class OrderItem(Base):
 
     order_id = Column(
         UUID(as_uuid=True),
-        ForeignKey('order.order_id', ondelete='CASCADE'),
+        ForeignKey('orders.order_id', ondelete='CASCADE'),
         primary_key=True
     )
     item_id = Column(
