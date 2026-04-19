@@ -13,6 +13,8 @@ async def list_categories(
         consumer_id: Union[UUID, str],
         db: AsyncSession = Depends(get_db)
     ) -> List[category_schema.Category]:
-
-    categories = await category_crud.get_categories(db)
+    try:
+        categories = await category_crud.get_categories(db)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     return categories
