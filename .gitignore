@@ -1,0 +1,4 @@
+.env
+.venv
+init_db.sql
+.idea
