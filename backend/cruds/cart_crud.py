@@ -7,6 +7,16 @@ from uuid import UUID
 from schemas import cart_schema
 
 async def get_cart_items(db: AsyncSession, consumer_id: Union[UUID, str]):
+    consumer = await db.execute(
+        Select(models.Consumer).where(models.Consumer.consumer_id == consumer_id)
+    )
+    consumer = consumer.scalar_one_or_none()
+    if consumer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Consumer not found'
+        )
+
     cart = await db.execute(
         Select(models.Cart).where(models.Cart.consumer_id == consumer_id)
     )
@@ -54,6 +64,27 @@ async def create_order(
         store_id: Union[UUID, str],
         items: List[Union[UUID, str]]
     ):
+    consumer = await db.execute(
+        Select(models.Consumer).where(models.Consumer.consumer_id == consumer_id)
+    )
+    consumer = consumer.scalar_one_or_none()
+    if consumer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Consumer not found'
+        )
+
+    store = await db.execute(
+        Select(models.Store).where(models.Store.store_id == store_id)
+    )
+    store = store.scalar_one_or_none()
+    if store is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Store not found'
+        )
+
+
     cart_items = await get_cart_items_by_id(db, consumer_id, items)
     if cart_items is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='zero items in cart')
@@ -99,18 +130,43 @@ async def delete_cart_item(
         consumer_id: Union[UUID, str],
         item_id: Union[UUID, str]
     ):
+    consumer = await db.execute(
+        Select(models.Consumer).where(models.Consumer.consumer_id == consumer_id)
+    )
+    consumer = consumer.scalar_one_or_none()
+    if consumer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Consumer not found'
+        )
+    item = await db.execute(
+        Select(models.Item).where(models.Item.item_id == item_id)
+    )
+    item = item.scalar_one_or_none()
+    if item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='item not found'
+        )
+
     cart = await db.execute(
         Select(models.Cart).where(models.Cart.consumer_id == consumer_id)
     )
     cart = cart.scalar_one_or_none()
     if cart is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='cart item not found')
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='cart item not found'
+        )
     cart_item = await db.execute(
         Select(models.CartItem)
         .where(models.CartItem.item_id == item_id, models.CartItem.cart_id == cart.cart_id)
     )
     cart_item = cart_item.scalar_one_or_none()
     if cart_item is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='cart item not found')
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='cart item not found'
+        )
     await db.delete(cart_item)
     await db.commit()

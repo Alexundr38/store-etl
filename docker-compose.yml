@@ -9,6 +9,8 @@ services:
       POSTGRES_CONSUMER_PASSWORD: ${POSTGRES_CONSUMER_PASSWORD}
       POSTGRES_ETL_USER: ${POSTGRES_ETL_USER}
       POSTGRES_ETL_PASSWORD: ${POSTGRES_ETL_PASSWORD}
+      LOGGER_USER: ${LOGGER_USER}
+      LOGGER_PASSWORD: ${LOGGER_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql
       - ./init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
@@ -30,10 +32,41 @@ services:
       POSTGRES_CONSUMER_USER: ${POSTGRES_CONSUMER_USER}
       POSTGRES_CONSUMER_PASSWORD: ${POSTGRES_CONSUMER_PASSWORD}
       BACKEND_PORT: ${BACKEND_PORT}
+      CLICKHOUSE_HTTP_PORT: ${CLICKHOUSE_HTTP_PORT}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      LOGGER_USER: ${LOGGER_USER}
+      LOGGER_PASSWORD: ${LOGGER_PASSWORD}
+
     ports:
       - "127.0.0.1:8001:${BACKEND_PORT}"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.1.2.3
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: ${CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT}
+      LOGGER_USER: ${LOGGER_USER}
+      LOGGER_PASSWORD: ${LOGGER_PASSWORD}
+    ports:
+      - "127.0.0.1:8124:${CLICKHOUSE_HTTP_PORT}"
+      - "127.0.0.1:9001:${CLICKHOUSE_APPLICATION_PORT}"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./init_clickhouse.sh:/docker-entrypoint-initdb.d/init-clickhouse.sh
+    healthcheck:
+      test: ["CMD", "clickhouse", "client", "-q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
 volumes:
   postgres_data:
+  clickhouse_data:

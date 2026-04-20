@@ -41,9 +41,15 @@ async def login_consumer(db: AsyncSession, consumer: consumer_schema.ConsumerLog
 
     db_consumer = db_consumer.scalar_one_or_none()
     if db_consumer is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Consumer not found"
+        )
     if not verify_password(consumer.password, db_consumer.password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password"
+        )
     return db_consumer.consumer_id
 
 
@@ -63,6 +69,9 @@ async def update_consumer(db: AsyncSession, consumer: consumer_schema.ConsumerUp
 
     db_consumer = db_consumer.scalar_one_or_none()
     if db_consumer is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Consumer not found"
+        )
     await db.commit()
     return db_consumer.consumer_id

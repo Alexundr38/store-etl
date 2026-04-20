@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     POSTGRES_CONSUMER_USER: str
     POSTGRES_CONSUMER_PASSWORD: str
 
+    CLICKHOUSE_HTTP_PORT:int
+    CLICKHOUSE_DB: str
+
+    LOGGER_USER: str
+    LOGGER_PASSWORD: str
+
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(__file__), "..", ".env"),
         extra='ignore'
@@ -36,3 +42,15 @@ def get_consumer_db():
 
 def get_backend_port():
     return settings.BACKEND_PORT
+
+def get_logger_user():
+    return settings.LOGGER_USER
+
+def get_logger_password():
+    return settings.LOGGER_PASSWORD
+
+def get_clickhouse_http_port():
+    return settings.CLICKHOUSE_HTTP_PORT
+
+def get_clickhouse_db():
+    return settings.CLICKHOUSE_DB

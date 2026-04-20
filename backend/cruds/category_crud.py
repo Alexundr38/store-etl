@@ -11,5 +11,8 @@ async def get_categories(db: AsyncSession):
     categories = categories.scalars().all()
 
     if categories is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Category not found"
+        )
     return categories

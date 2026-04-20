@@ -30,7 +30,10 @@ async def get_items_by_category(
     items = items.scalars().all()
 
     if len(items) == 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Category {category_id} not found",
+        )
     return items
 
 
@@ -40,6 +43,16 @@ async def add_item_to_cart(
         item_id: Union[str, UUID],
         count_item: int,
     ):
+    consumer = await db.execute(
+        Select(models.Consumer).where(models.Consumer.consumer_id == consumer_id)
+    )
+    consumer = consumer.scalar_one_or_none()
+    if consumer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Consumer {consumer_id} not found",
+        )
+
     cart = await db.execute(
         Select(models.Cart).where(models.Cart.consumer_id == consumer_id)
     )
@@ -49,6 +62,16 @@ async def add_item_to_cart(
         db.add(cart)
         await db.flush()
         await db.refresh(cart)
+
+    item = await db.execute(
+        Select(models.Item).where(models.Item.item_id == item_id)
+    )
+    item = item.scalar_one_or_none()
+    if item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Item {item_id} not found",
+        )
 
     cart_item = await db.execute(
         Select(models.CartItem).where(models.CartItem.item_id == item_id, models.CartItem.cart_id == cart.cart_id)
