@@ -5,8 +5,44 @@ from db.db_config import get_db
 from cruds import consumer_crud
 from dependencies import get_logger
 from services.logger_service import ClickHouseLogger
+from typing import List
 
 router = APIRouter(prefix="/consumer", tags=["consumer"])
+
+@router.get("/", status_code=status.HTTP_200_OK)
+async def get_consumers(
+        db: AsyncSession = Depends(get_db),
+        logger: ClickHouseLogger = Depends(get_logger)
+    ) -> List[consumer_schema.ConsumerId]:
+    try:
+        consumers = await consumer_crud.get_consumers(db)
+        for consumer in consumers:
+            await logger.log_event(
+                event_type="get_consumers",
+                endpoint="/consumer/",
+                http_method="GET",
+                status_code=status.HTTP_200_OK,
+                consumer_id=consumer.consumer_id
+            )
+        return consumers
+    except HTTPException as e:
+        await logger.log_event(
+            event_type="api_error",
+            endpoint="/consumer/",
+            http_method="GET",
+            status_code=e.status_code,
+            error_message=str(e.detail)
+        )
+        raise e
+    except Exception as e:
+        await logger.log_event(
+            event_type="api_error",
+            endpoint="/consumer/",
+            http_method="GET",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            error_message=e
+        )
+        raise e
 
 @router.post("/create/", status_code=status.HTTP_201_CREATED)
 async def create_consumer(

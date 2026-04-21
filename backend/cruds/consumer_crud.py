@@ -17,6 +17,18 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return password_context.verify(plain_password, hashed_password)
 
 
+async def get_consumers(db: AsyncSession):
+    consumers = await db.execute(
+        Select(models.Consumer)
+    )
+    consumers = consumers.scalars().all()
+    if len(consumers) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Consumers not found"
+        )
+    return consumers
+
 async def create_consumer(db: AsyncSession, consumer: consumer_schema.ConsumerCreate):
     hashed_password = get_password_hash(consumer.password)
     db_consumer = models.Consumer(

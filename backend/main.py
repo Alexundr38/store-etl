@@ -7,7 +7,7 @@ import config
 from middleware.logging_middleware import LoggingMiddleware
 from services.logger_service import ClickHouseLogger
 from config import get_backend_port
-from routers import consumer_router, category_router, item_router, cart_router
+from routers import consumer_router, category_router, item_router, cart_router, store_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -33,6 +33,7 @@ app.include_router(consumer_router.router)
 app.include_router(category_router.router)
 app.include_router(item_router.router)
 app.include_router(cart_router.router)
+app.include_router(store_router.router)
 
 @app.get("/")
 async def root():

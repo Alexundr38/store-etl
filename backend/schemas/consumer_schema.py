@@ -37,3 +37,10 @@ class ConsumerLogout(BaseModel):
     @field_serializer('consumer_id')
     def serialize_consumer_id(self, consumer_id: UUID):
         return str(consumer_id) if consumer_id else None
+
+class ConsumerId(BaseModel):
+    consumer_id: Union[UUID, str]
+
+    @field_serializer('consumer_id')
+    def serialize_consumer_id(self, consumer_id: UUID):
+        return str(consumer_id) if consumer_id else None
