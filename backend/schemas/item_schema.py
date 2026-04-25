@@ -3,6 +3,12 @@ from typing import Union
 from pydantic import BaseModel, field_serializer
 
 
+class AddItemRequest(BaseModel):
+    consumer_id: Union[str, UUID]
+    item_id: Union[str, UUID]
+    count_items: int = 1
+
+
 class ItemBase(BaseModel):
     item_id: Union[str, UUID]
     category_id: Union[str, UUID]

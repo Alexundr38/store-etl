@@ -2,3 +2,4 @@
 .venv
 init_db.sql
 .idea
+__pycache__

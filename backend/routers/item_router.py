@@ -58,22 +58,20 @@ async def list_items(
 
 @router.post("/add/", response_model=item_schema.CartItem, status_code=status.HTTP_201_CREATED)
 async def add_item_to_cart(
-        consumer_id: Union[str, UUID],
-        item_id: Union[str, UUID],
-        count_items: int = 1,
+        request: item_schema.AddItemRequest,
         db: AsyncSession = Depends(get_db),
         logger: ClickHouseLogger = Depends(get_logger)
     ):
     try:
-        cart_item = await item_crud.add_item_to_cart(db, consumer_id, item_id, count_items)
+        cart_item = await item_crud.add_item_to_cart(db, request.consumer_id, request.item_id, request.count_items)
         await logger.log_event(
             event_type="add_item",
             endpoint="/item/add/",
             http_method="POST",
             status_code=status.HTTP_201_CREATED,
-            consumer_id=consumer_id,
-            item_id=item_id,
-            count_item=count_items,
+            consumer_id=request.consumer_id,
+            item_id=request.item_id,
+            count_item=request.count_items,
         )
         return cart_item
     except HTTPException as e:
@@ -83,9 +81,9 @@ async def add_item_to_cart(
             http_method="POST",
             status_code=e.status_code,
             error_message=str(e.detail),
-            consumer_id=consumer_id,
-            item_id=item_id,
-            count_items=count_items,
+            consumer_id=request.consumer_id,
+            item_id=request.item_id,
+            count_items=request.count_items,
         )
         raise e
     except Exception as e:
@@ -95,8 +93,8 @@ async def add_item_to_cart(
             http_method="POST",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             error_message=str(e),
-            consumer_id=consumer_id,
-            item_id=item_id,
-            count_items=count_items,
+            consumer_id=request.consumer_id,
+            item_id=request.item_id,
+            count_items=request.count_items,
         )
         raise e
