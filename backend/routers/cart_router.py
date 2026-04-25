@@ -99,20 +99,19 @@ async def create_order(
 
 @router.delete('/delete/', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_cart_item(
-        consumer_id: Union[UUID, str],
-        item_id: Union[UUID, str],
+        delete_data: cart_schema.DeleteCartItem,
         db: AsyncSession = Depends(get_db),
         logger: ClickHouseLogger = Depends(get_logger)
     ):
     try:
-        await cart_crud.delete_cart_item(db, consumer_id, item_id)
+        await cart_crud.delete_cart_item(db, delete_data.consumer_id, delete_data.item_id)
         await logger.log_event(
             event_type="delete_cart_item",
             endpoint="/cart/delete/",
             http_method="DELETE",
             status_code=status.HTTP_204_NO_CONTENT,
-            consumer_id=consumer_id,
-            item_id=item_id,
+            consumer_id=delete_data.consumer_id,
+            item_id=delete_data.item_id,
         )
     except HTTPException as e:
         await logger.log_event(
@@ -121,8 +120,8 @@ async def delete_cart_item(
             http_method="DELETE",
             status_code=e.status_code,
             error_message=str(e.detail),
-            consumer_id=consumer_id,
-            item_id=item_id,
+            consumer_id=delete_data.consumer_id,
+            item_id=delete_data.item_id,
         )
         raise e
     except Exception as e:
@@ -132,7 +131,7 @@ async def delete_cart_item(
             http_method="DELETE",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             error_message=e,
-            consumer_id=consumer_id,
-            item_id=item_id,
+            consumer_id=delete_data.consumer_id,
+            item_id=delete_data.item_id,
         )
         raise e

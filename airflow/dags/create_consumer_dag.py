@@ -4,9 +4,14 @@ from airflow.providers.http.hooks.http import HttpHook
 from datetime import datetime
 from random import randint
 
+default_args = {
+    'owner': 'airflow_administrator',
+}
+
 with DAG(
     dag_id="crate_consumer_dag",
-    start_date=datetime(2026, 4, 25),
+    default_args=default_args,
+    start_date=datetime.now(),
     catchup=False,
     schedule='*/15 * * * *',
     tags=['store_bot']

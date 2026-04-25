@@ -3,6 +3,10 @@ from typing import Union, List
 from pydantic import BaseModel, field_serializer
 from datetime import datetime
 
+class DeleteCartItem(BaseModel):
+    consumer_id: Union[UUID, str]
+    item_id: Union[UUID, str]
+
 class CartOrder(BaseModel):
     consumer_id: Union[UUID, str]
     store_id: Union[UUID, str]

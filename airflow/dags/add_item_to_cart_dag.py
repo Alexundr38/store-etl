@@ -4,7 +4,11 @@ from airflow.providers.http.hooks.http import HttpHook
 from datetime import datetime
 from random import randint
 
-def get_consumer(**context):
+default_args = {
+    'owner': 'airflow_administrator',
+}
+
+def get_consumer():
     get_hook = HttpHook(http_conn_id='backend_api', method='GET')
 
     response = get_hook.run(
@@ -16,7 +20,32 @@ def get_consumer(**context):
     return consumer_id
 
 
-def get_category(ti, **context):
+def login_consumer(ti):
+    consumer_id = ti.xcom_pull(task_ids='get_consumer')
+    post_hook = HttpHook(http_conn_id='backend_api', method='POST')
+    response = post_hook.run(
+        endpoint='/consumer/login/',
+        json={
+            'consumer_id': consumer_id,
+            'password': '111111'
+        }
+    )
+    response.raise_for_status()
+
+
+def logout_consumer(ti):
+    consumer_id = ti.xcom_pull(task_ids='get_consumer')
+    post_hook = HttpHook(http_conn_id='backend_api', method='POST')
+
+    response = post_hook.run(
+        endpoint='/consumer/logout/',
+        json={
+            'consumer_id': consumer_id
+        }
+    )
+
+
+def get_category(ti):
     get_hook = HttpHook(http_conn_id='backend_api', method='GET')
     consumer_id = ti.xcom_pull(task_ids='get_consumer')
 
@@ -32,7 +61,7 @@ def get_category(ti, **context):
     return category_id
 
 
-def check_page(ti, **context):
+def check_page(ti):
     get_hook = HttpHook(http_conn_id='backend_api', method='GET')
     count_pages = randint(1, 5)
     consumer_id = ti.xcom_pull(task_ids='get_consumer')
@@ -57,7 +86,7 @@ def check_page(ti, **context):
     return select_items
 
 
-def add_item_to_cart(ti, **context):
+def add_item_to_cart(ti):
     post_hook = HttpHook(http_conn_id='backend_api', method='POST')
     items = ti.xcom_pull(task_ids='check_page')
     consumer_id = ti.xcom_pull(task_ids='get_consumer')
@@ -74,17 +103,22 @@ def add_item_to_cart(ti, **context):
         response.raise_for_status()
 
 
-with DAG(
+with (DAG(
     dag_id="add_item_to_cart_dag",
-    start_date=datetime(2026, 4, 25),
+    default_args=default_args,
+    start_date=datetime.now(),
     catchup=False,
     schedule='*/5 * * * *',
     tags=['store_bot']
-) as dag:
+) as dag):
 
     get_consumer_task = PythonOperator(
         task_id='get_consumer',
         python_callable=get_consumer,
+    )
+    login_consumer_task = PythonOperator(
+        task_id='login_consumer',
+        python_callable=login_consumer,
     )
     get_category_task = PythonOperator(
         task_id='get_category',
@@ -98,5 +132,10 @@ with DAG(
         task_id='add_item_to_cart',
         python_callable=add_item_to_cart,
     )
+    logout_consumer_task = PythonOperator(
+        task_id='logout_consumer',
+        python_callable=logout_consumer,
+    )
 
-    get_consumer_task >> get_category_task >> check_page_task >> add_item_to_cart_task
+    get_consumer_task >> login_consumer_task >> get_category_task >> check_page_task
+    check_page_task >> add_item_to_cart_task >> logout_consumer_task
