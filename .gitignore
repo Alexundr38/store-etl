@@ -3,3 +3,4 @@
 init_db.sql
 .idea
 __pycache__
+airflow/logs/

@@ -15,7 +15,6 @@ services:
       - postgres_data:/var/lib/postgresql
       - ./init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
     networks:
-      - etl_store_network
       - backend_store_network
     ports:
       - "127.0.0.1:5433:${POSTGRES_PORT}"
@@ -42,6 +41,7 @@ services:
     ports:
       - "127.0.0.1:8001:${BACKEND_PORT}"
     networks:
+      - etl_store_network
       - backend_store_network
     depends_on:
       postgres:
