@@ -26,7 +26,9 @@ CREATE TABLE consumer(
     lastname VARCHAR(255) NOT NULL,
     patronymic VARCHAR(255),
     email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL
+    password VARCHAR(255) NOT NULL,
+    create_dt TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    update_dt TIMESTAMP NOT NULL DEFAULT current_timestamp
 );
 
 CREATE INDEX consumer_email_index ON consumer(email);
@@ -42,6 +44,7 @@ CREATE TABLE cart_item(
     cart_id UUID REFERENCES cart(cart_id),
     item_id UUID REFERENCES item(item_id),
     count_item INTEGER NOT NULL,
+    add_dt TIMESTAMP NOT NULL DEFAULT current_timestamp,
     PRIMARY KEY (cart_id, item_id)
 );
 

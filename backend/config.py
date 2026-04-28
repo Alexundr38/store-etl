@@ -28,8 +28,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode='after')
     def set_db_urls(self):
-        self.DATABASE_POSTGRES_URL = f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@postgres:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-        self.DATABASE_CONSUMER_URL = f"postgresql+asyncpg://{self.POSTGRES_CONSUMER_USER}:{self.POSTGRES_CONSUMER_PASSWORD}@postgres:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        self.DATABASE_POSTGRES_URL = f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@backend-postgres:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        self.DATABASE_CONSUMER_URL = f"postgresql+asyncpg://{self.POSTGRES_CONSUMER_USER}:{self.POSTGRES_CONSUMER_PASSWORD}@backend-postgres:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         return self
 
 settings = Settings()

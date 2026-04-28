@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import HTTPException, status
 from sqlalchemy import Select, Update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -74,7 +76,8 @@ async def update_consumer(db: AsyncSession, consumer: consumer_schema.ConsumerUp
             name=consumer.name,
             lastname=consumer.lastname,
             patronymic=consumer.patronymic,
-            email=consumer.email
+            email=consumer.email,
+            update_dt=datetime.datetime.now()
         )
         .returning(models.Consumer)
     )

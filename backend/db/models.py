@@ -98,6 +98,16 @@ class Consumer(Base):
         String(255),
         nullable=False
     )
+    create_dt = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.datetime.now()
+    )
+    update_dt = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.datetime.now()
+    )
 
     carts = relationship(
         'Cart',
@@ -149,6 +159,11 @@ class CartItem(Base):
     count_item = Column(
         Integer,
         nullable=False
+    )
+    add_dt = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.datetime.now()
     )
 
     cart = relationship(

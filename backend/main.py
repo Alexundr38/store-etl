@@ -12,7 +12,7 @@ from routers import consumer_router, category_router, item_router, cart_router, 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.logger = ClickHouseLogger(
-        host="clickhouse",
+        host="log-clickhouse",
         port=config.get_clickhouse_http_port(),
         database=config.get_clickhouse_db(),
         user=config.get_logger_user(),
