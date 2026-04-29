@@ -17,7 +17,7 @@ services:
     networks:
       - backend_store_network
     ports:
-      - "127.0.0.1:5433:${BACKEND_POSTGRES_PORT}"
+      - "127.0.0.1:${LOCAL_BACKEND_POSTGRES_PORT}:${BACKEND_POSTGRES_PORT}"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${BACKEND_POSTGRES_USER} -d ${BACKEND_POSTGRES_DB}"]
       interval: 10s
@@ -39,7 +39,7 @@ services:
       LOGGER_USER: ${LOGGER_USER}
       LOGGER_PASSWORD: ${LOGGER_PASSWORD}
     ports:
-      - "127.0.0.1:8001:${BACKEND_PORT}"
+      - "127.0.0.1:${LOCAL_BACKEND_PORT}:${BACKEND_PORT}"
     networks:
       - etl_store_network
       - backend_store_network
@@ -59,8 +59,8 @@ services:
       LOGGER_USER: ${LOGGER_USER}
       LOGGER_PASSWORD: ${LOGGER_PASSWORD}
     ports:
-      - "127.0.0.1:8124:${LOG_CLICKHOUSE_HTTP_PORT}"
-      - "127.0.0.1:9001:${LOG_CLICKHOUSE_APPLICATION_PORT}"
+      - "127.0.0.1:${LOCAL_CLICKHOUSE_LOG_HTTP_PORT}:${LOG_CLICKHOUSE_HTTP_PORT}"
+      - "127.0.0.1:${LOCAL_CLICKHOUSE_LOG_APPLICATION_PORT}:${LOG_CLICKHOUSE_APPLICATION_PORT}"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - ./init/init_clickhouse.sh:/docker-entrypoint-initdb.d/init-clickhouse.sh

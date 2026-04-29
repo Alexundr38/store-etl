@@ -1,4 +1,4 @@
-.PHONY: up-backend up-airflow down-backend down-airflow
+.PHONY: up-backend up-airflow up-dwh down-backend down-airflow
 
 up-backend:
 	docker compose -f backend/docker-compose.yml --env-file .env up --build -d
@@ -11,3 +11,6 @@ down-backend:
 
 down-airflow:
 	docker compose -f airflow/docker-compose.yml --env-file .env down
+
+up-dwh:
+	docker compose -f dwh/docker-compose.yml --env-file .env up --build -d

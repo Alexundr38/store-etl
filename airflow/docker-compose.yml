@@ -132,7 +132,7 @@ services:
     <<: *airflow-common
     command: api-server
     ports:
-      - "8080:${API_SERVER_PORT}"
+      - "${LOCAL_AIRFLOW_PORT}:${API_SERVER_PORT}"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:${API_SERVER_PORT}/api/v2/monitor/health"]
       interval: 30s

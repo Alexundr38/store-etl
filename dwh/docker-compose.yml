@@ -1,0 +1,30 @@
+services:
+  dwh-postgres:
+    build: ./postgres
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_cron
+      -c cron.database_name=${DWH_POSTGRES_DB}
+    environment:
+      POSTGRES_USER: ${DWH_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DWH_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DWH_POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - etl_store_network
+    ports:
+      - "127.0.0.1:${LOCAL_DWH_POSTGRES_PORT}:${DWH_POSTGRES_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DWH_POSTGRES_USER} -d ${DWH_POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+
+networks:
+  etl_store_network:
+    external: true
+    name: etl_store_network
