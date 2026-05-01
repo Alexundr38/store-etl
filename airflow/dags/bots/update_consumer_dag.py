@@ -5,7 +5,7 @@ from datetime import datetime
 from random import randint
 
 default_args = {
-    'owner': 'airflow_administrator',
+    'owner': 'airflow_administrator'
 }
 
 def get_consumer():
@@ -35,52 +35,34 @@ def logout_consumer(ti):
     response = post_hook.run(
         endpoint='/consumer/logout/',
         json={
-            'consumer_id': consumer_id,
+            'consumer_id': consumer_id
         }
     )
     response.raise_for_status()
 
-def get_cart_item(ti):
-    get_hook = HttpHook(http_conn_id='backend_api', method='GET')
+def update_consumer(ti):
+    post_hook = HttpHook(http_conn_id='backend_api', method='POST')
     consumer_id = ti.xcom_pull(task_ids='get_consumer')
-    response = get_hook.run(
-        endpoint='/cart/',
-        data={
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    response = post_hook.run(
+        endpoint='/consumer/update/',
+        json={
             'consumer_id': consumer_id,
+            'name': f'name_{timestamp}',
+            'lastname': f'lastname_{timestamp}',
+            'patronymic': f'patronymic_{timestamp}' if randint(0, 1) else None,
+            'email': f'email_{timestamp}@gmail.com',
         }
     )
     response.raise_for_status()
-    cart_item = response.json()
-    return cart_item
-
-def delete_cart_item(ti):
-    delete_hook = HttpHook(http_conn_id='backend_api', method='DELETE')
-    consumer_id = ti.xcom_pull(task_ids='get_consumer')
-    items = ti.xcom_pull(task_ids='get_cart_item')
-    count_items = min(len(items), 3)
-    deleted_items = set()
-    for _ in range(count_items):
-        item_id = items[randint(0, len(items) - 1)]['item_id']
-        if item_id in deleted_items:
-            continue
-        deleted_items.add(item_id)
-        response = delete_hook.run(
-            endpoint='/cart/delete/',
-            json={
-                'consumer_id': consumer_id,
-                'item_id': item_id,
-            }
-        )
-        response.raise_for_status()
-
 
 
 with DAG(
-    dag_id='delete_cart_item_dag',
+    dag_id='update_consumer_dag',
     default_args=default_args,
     start_date=datetime.now(),
     catchup=False,
-    schedule='*/5 * * * *',
+    schedule='*/1 * * * *',
     tags=['store_bot']
 ) as dag:
 
@@ -96,14 +78,9 @@ with DAG(
         task_id='logout_consumer',
         python_callable=logout_consumer,
     )
-    get_cart_item_task = PythonOperator(
-        task_id='get_cart_item',
-        python_callable=get_cart_item,
-    )
-    delete_cart_item_task = PythonOperator(
-        task_id='delete_cart_item',
-        python_callable=delete_cart_item,
+    update_consumer_task = PythonOperator(
+        task_id='update_consumer',
+        python_callable=update_consumer,
     )
 
-    get_consumer_task >> login_consumer_task >> get_cart_item_task
-    get_cart_item_task >> delete_cart_item_task >> logout_consumer_task
+    get_consumer_task >> login_consumer_task >> update_consumer_task >> logout_consumer_task

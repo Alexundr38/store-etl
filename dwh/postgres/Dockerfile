@@ -5,4 +5,5 @@ RUN apt-get update && apt-get install -y \
     postgresql-18-cron \
     && rm -rf /var/lib/apt/lists/*
 
-COPY init_db.sql /docker-entrypoint-initdb.d/
+COPY 01_init_db.sql /docker-entrypoint-initdb.d/
+COPY 02_init_db.sh /docker-entrypoint-initdb.d/

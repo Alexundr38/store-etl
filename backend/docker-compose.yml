@@ -16,6 +16,7 @@ services:
       - ./init/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
     networks:
       - backend_store_network
+      - etl_store_network
     ports:
       - "127.0.0.1:${LOCAL_BACKEND_POSTGRES_PORT}:${BACKEND_POSTGRES_PORT}"
     healthcheck:
