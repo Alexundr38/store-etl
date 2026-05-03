@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import Select, func, Update
@@ -82,6 +84,7 @@ async def add_item_to_cart(
             cart_id=cart.cart_id,
             item_id=item_id,
             count_item=count_item,
+            add_dt=datetime.datetime.now(),
         )
         db.add(cart_item)
         await db.flush()

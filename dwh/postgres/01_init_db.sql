@@ -261,8 +261,58 @@ SET
 WHERE parent_table = 'staging.order_item';
 
 
+CREATE TABLE staging.logs(
+    event_time TIMESTAMP,
+    duration_ms INTEGER,
+    event_type VARCHAR(255),
+    consumer_id UUID,
+    endpoint VARCHAR(255),
+    http_method VARCHAR(255),
+    item_id UUID,
+    category_id UUID,
+    store_id UUID,
+    order_id UUID,
+    price DECIMAL(8,2),
+    count_item INTEGER,
+    error_message VARCHAR(255),
+    status_code INTEGER,
+    load_id UUID,
+    load_dt TIMESTAMP NOT NULL,
+    source_system VARCHAR(50)
+) PARTITION BY RANGE (load_dt);
+
+SELECT partman.create_partition(
+    p_parent_table := 'staging.logs',
+    p_control := 'load_dt',
+    p_interval := '10 minute',
+    p_type := 'range',
+    p_premake := 4,
+    p_default_table := true,
+    p_automatic_maintenance := 'on'
+);
+
+UPDATE partman.part_config
+SET
+    retention = '10 minute',
+    retention_keep_table = false,
+    infinite_time_partitions = true
+WHERE parent_table = 'staging.logs';
+
+
 SELECT cron.schedule(
     'partman-category',
     '* * * * *',
     $$SELECT partman.run_maintenance();$$
+);
+
+
+
+CREATE SCHEMA etl;
+CREATE TABLE etl.etl_dt(
+    table_name VARCHAR(100) NOT NULL,
+    table_schema VARCHAR(100) NOT NULL,
+    source_system VARCHAR(100) NOT NULL,
+    etl_dt TIMESTAMP NOT NULL,
+    load_id UUID NOT NULL,
+    UNIQUE(table_name, table_schema, source_system)
 );

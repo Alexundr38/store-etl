@@ -38,7 +38,9 @@ async def create_consumer(db: AsyncSession, consumer: consumer_schema.ConsumerCr
         lastname=consumer.lastname,
         patronymic=consumer.patronymic,
         email=consumer.email,
-        password=hashed_password
+        password=hashed_password,
+        create_dt=datetime.datetime.now(),
+        update_dt=datetime.datetime.now()
     )
 
     db.add(db_consumer)

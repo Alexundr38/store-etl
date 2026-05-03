@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import HTTPException, status
 from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -92,6 +94,7 @@ async def create_order(
     order = models.Orders(
         consumer_id=consumer_id,
         store_id=store_id,
+        order_dt=datetime.datetime.now()
     )
     db.add(order)
     await db.flush()
