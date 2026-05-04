@@ -95,7 +95,7 @@ with (DAG(
     dag_id='create_order_dag',
     start_date=datetime.now(),
     catchup=False,
-    schedule='*/1 * * * *',
+    schedule='*/2 * * * *',
     default_args=default_args,
     tags=['store_bot'],
 ) as dag):

@@ -111,13 +111,13 @@ default_args = {
 }
 
 @dag(
-    schedule='*/10 * * * *',
+    schedule='3/10 * * * *',
     default_args=default_args,
     start_date=datetime.now(),
     catchup=False,
     tags=['etl', 'to_staging', 'logs'],
 )
-def transfer_for_staging_from_click_log_dag():
+def transfer_to_staging_from_click_log_dag():
 
     @task(task_id='generate_load_id')
     def generate_load_id_task():
@@ -129,4 +129,4 @@ def transfer_for_staging_from_click_log_dag():
         logs = build_table_task_group('logs', 'etl', 'staging', load_id)
 
 
-transfer_for_staging_from_click_log_dag()
+transfer_to_staging_from_click_log_dag()

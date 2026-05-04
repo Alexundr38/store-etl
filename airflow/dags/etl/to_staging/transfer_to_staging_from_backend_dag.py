@@ -179,7 +179,7 @@ default_args = {
 }
 
 @dag(
-    schedule='*/10 * * * *',
+    schedule='3/10 * * * *',
     default_args=default_args,
     start_date=datetime.now(),
     catchup=False,

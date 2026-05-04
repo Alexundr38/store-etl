@@ -108,7 +108,7 @@ with (DAG(
     default_args=default_args,
     start_date=datetime.now(),
     catchup=False,
-    schedule='*/1 * * * *',
+    schedule='* * * * *',
     tags=['store_bot']
 ) as dag):
 

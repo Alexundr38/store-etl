@@ -80,7 +80,7 @@ with DAG(
     default_args=default_args,
     start_date=datetime.now(),
     catchup=False,
-    schedule='*/2 * * * *',
+    schedule='*/5 * * * *',
     tags=['store_bot']
 ) as dag:
 
