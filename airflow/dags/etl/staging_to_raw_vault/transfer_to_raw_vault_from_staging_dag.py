@@ -35,19 +35,21 @@ def transfer_to_raw_vault_from_staging_dag():
             cursor = connection.cursor()
 
             cursor.execute("""
-                SELECT category_id
+                SELECT 
+                    category_id,
+                    source_system
                 FROM staging.category
             """)
-            staging_category = [row[0] for row in cursor.fetchall()]
-            print(f'Selected {len(staging_category)} rows from staging.category')
+            staging_rows = cursor.fetchall()
+            print(f'Selected {len(staging_rows)} rows from staging.category')
 
             raw_vault_data = []
-            for category_id in staging_category:
+            for category_id, source_system in staging_rows:
                 raw_vault_data.append((
                     compute_hash_key(category_id),
                     category_id,
                     load_dt,
-                    'backend-postgres'      #TODO change const
+                    source_system
                 ))
 
             insert_sql = """
@@ -62,7 +64,45 @@ def transfer_to_raw_vault_from_staging_dag():
             cursor.close()
             connection.close()
 
+        @task(task_id='load_hub_item')
+        def load_hub_item(load_dt):
+            dwh_hook = PostgresHook(postgres_conn_id='dwh_postgres_staging_to_raw_vault_transfer')
+            connection = dwh_hook.get_conn()
+            cursor = connection.cursor()
+
+            cursor.execute("""
+                SELECT
+                    item_id,
+                    source_system
+                FROM staging.item
+            """)
+
+            staging_rows = cursor.fetchall()
+            print(f'Selected {len(staging_rows)} rows from staging.item')
+
+            raw_vault_data = []
+            for item_id, source_system in staging_rows:
+                raw_vault_data.append((
+                    compute_hash_key(item_id),
+                    item_id,
+                    load_dt,
+                    source_system
+                ))
+
+            insert_sql = """
+                INSERT INTO raw_vault.hub_item (hub_item_hash_key, item_id, load_dt, record_source)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (hub_item_hash_key) DO NOTHING
+            """
+            cursor.executemany(insert_sql, raw_vault_data)
+            print(f'Inserted max {len(raw_vault_data)} rows to raw_vault.hub_item')
+
+            connection.commit()
+            cursor.close()
+            connection.close()
+
         load_hub_category(load_dt)
+        load_hub_item(load_dt)
 
     @task_group(group_id='load_satellites')
     def load_satellites(load_dt):
@@ -73,19 +113,22 @@ def transfer_to_raw_vault_from_staging_dag():
             cursor = connection.cursor()
 
             cursor.execute("""
-                SELECT category_id, name
+                SELECT 
+                    category_id, 
+                    name,
+                    source_system
                 FROM staging.category
             """)
             staging_rows = cursor.fetchall()
             print(f'Selected {len(staging_rows)} rows from staging.category')
 
             raw_vault_data = []
-            for category_id, name in staging_rows:
+            for category_id, name, source_system in staging_rows:
                 raw_vault_data.append((
                     compute_hash_key(category_id),
                     load_dt,
                     name,
-                    'backend-postgres'
+                    source_system
                 ))
 
             insert_sql = """
@@ -100,10 +143,95 @@ def transfer_to_raw_vault_from_staging_dag():
             cursor.close()
             connection.close()
 
+        @task(task_id='load_sat_item')
+        def load_sat_item(load_dt):
+            dwh_hook = PostgresHook(postgres_conn_id='dwh_postgres_staging_to_raw_vault_transfer')
+            connection = dwh_hook.get_conn()
+            cursor = connection.cursor()
+
+            cursor.execute("""
+                SELECT
+                    item_id,
+                    name,
+                    price,
+                    source_system
+                FROM staging.item
+            """)
+            staging_rows = cursor.fetchall()
+            print(f'Selected {len(staging_rows)} rows from staging.item')
+
+            raw_vault_data = []
+            for item_id, name, price, source_system in staging_rows:
+                raw_vault_data.append((
+                    compute_hash_key(item_id),
+                    load_dt,
+                    name,
+                    price,
+                    source_system
+                ))
+
+            insert_sql = """
+                INSERT INTO raw_vault.sat_item (hub_item_hash_key, load_dt, name, price, record_source)
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (hub_item_hash_key, load_dt) DO NOTHING
+            """
+            cursor.executemany(insert_sql, raw_vault_data)
+            print(f'Inserted max {len(raw_vault_data)} rows to raw_vault.sat_item')
+
+            connection.commit()
+            cursor.close()
+            connection.close()
+
         load_sat_category(load_dt)
+        load_sat_item(load_dt)
+
+
+    @task_group(group_id='load_links')
+    def load_links(load_dt):
+        @task(task_id='load_link_category_item')
+        def load_link_category_item(load_dt):
+            dwh_hook = PostgresHook(postgres_conn_id='dwh_postgres_staging_to_raw_vault_transfer')
+            connection = dwh_hook.get_conn()
+            cursor = connection.cursor()
+            cursor.execute("""
+                SELECT
+                    item_id,
+                    category_id,
+                    source_system
+                FROM
+                    staging.item
+            """)
+
+            staging_rows = cursor.fetchall()
+            print(f'Selected {len(staging_rows)} rows from staging.item')
+
+            raw_vault_data = []
+            for item_id, category_id, source_system in staging_rows:
+                raw_vault_data.append((
+                    compute_hash_key(category_id),
+                    compute_hash_key(item_id),
+                    load_dt,
+                    source_system
+                ))
+
+            insert_sql = """
+                INSERT INTO raw_vault.link_category_item (hub_category_hash_key, hub_item_hash_key, load_dt, record_source)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (hub_category_hash_key, hub_item_hash_key) DO NOTHING
+            """
+            cursor.executemany(insert_sql, raw_vault_data)
+            print(f'Inserted max {len(raw_vault_data)} rows to raw_vault.link_category_item')
+
+            connection.commit()
+            cursor.close()
+            connection.close()
+
+        load_link_category_item(load_dt)
+
 
     load_dt = get_load_dt()
     load_hubs(load_dt)
     load_satellites(load_dt)
+    load_links(load_dt)
 
 transfer_to_raw_vault_from_staging_dag()

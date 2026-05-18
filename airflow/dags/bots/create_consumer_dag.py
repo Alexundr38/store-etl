@@ -9,7 +9,7 @@ default_args = {
 }
 
 with DAG(
-    dag_id="crate_consumer_dag",
+    dag_id="create_consumer_dag",
     default_args=default_args,
     start_date=datetime.now(),
     catchup=False,
