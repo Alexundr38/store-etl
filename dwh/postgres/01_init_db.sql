@@ -425,7 +425,7 @@ CREATE TABLE IF NOT EXISTS raw_vault.sat_consumer(
     load_dt                 TIMESTAMP NOT NULL,
     update_dt               TIMESTAMP NOT NULL,
     name                    VARCHAR(255) NOT NULL,
-    last_name               VARCHAR(255) NOT NULL,
+    lastname                VARCHAR(255) NOT NULL,
     patronymic              VARCHAR(255),
     email                   VARCHAR(255) NOT NULL,
     create_dt               TIMESTAMP NOT NULL,
