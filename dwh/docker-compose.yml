@@ -25,8 +25,31 @@ services:
       timeout: 5s
       retries: 5
 
+  dwh-clickhouse:
+    image: clickhouse/clickhouse-server:25.1.2.3
+    environment:
+      CLICKHOUSE_USER: ${DWH_CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${DWH_CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DB: ${DWH_CLICKHOUSE_DB}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: ${DWH_CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT}
+    ports:
+      - "127.0.0.1:${LOCAL_CLICKHOUSE_DWH_HTTP_PORT}:${DWH_CLICKHOUSE_HTTP_PORT}"
+      - "127.0.0.1:${LOCAL_CLICKHOUSE_DWH_APPLICATION_PORT}:${DWH_CLICKHOUSE_APPLICATION_PORT}"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse/01_init_db.sql:/docker-entrypoint-initdb.d/01_init_db.sql
+    networks:
+      - etl_store_network
+    healthcheck:
+      test: ["CMD", "clickhouse", "client", "-q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
 volumes:
   postgres_data:
+  clickhouse_data:
 
 networks:
   etl_store_network:
