@@ -15,6 +15,10 @@ CREATE TABLE IF NOT EXISTS $CLICKHOUSE_DB.logs (
     store_id Nullable(UUID),
     order_id Nullable(UUID),
     price Nullable(DECIMAL(8,2)),
+    name Nullable(String),
+    lastname Nullable(String),
+    patronymic Nullable(String),
+    email Nullable(String),
     count_item Nullable(UInt32),
     error_message Nullable(String),
     status_code Nullable(UInt16)

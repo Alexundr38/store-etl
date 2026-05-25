@@ -57,7 +57,11 @@ async def create_consumer(
             endpoint="/consumer/create/",
             http_method="POST",
             status_code=201,
-            consumer_id=consumer_id
+            consumer_id=consumer_id,
+            name=consumer.name,
+            lastname=consumer.lastname,
+            patronymic=consumer.patronymic,
+            email=consumer.email
         )
         return {"consumer_id": consumer_id}
     except HTTPException as e:
@@ -66,7 +70,11 @@ async def create_consumer(
             endpoint="/consumer/create/",
             http_method="POST",
             status_code=e.status_code,
-            error_message=str(e.detail)
+            error_message=str(e.detail),
+            name=consumer.name,
+            lastname=consumer.lastname,
+            patronymic=consumer.patronymic,
+            email=consumer.email
         )
         raise e
     except Exception as e:
@@ -75,7 +83,11 @@ async def create_consumer(
             endpoint="/consumer/create/",
             http_method="POST",
             status_code=500,
-            error_message=str(e)
+            error_message=str(e),
+            name=consumer.name,
+            lastname=consumer.lastname,
+            patronymic=consumer.patronymic,
+            email=consumer.email
         )
         raise e
 
@@ -143,6 +155,10 @@ async def update_consumer(
             http_method="POST",
             status_code=status.HTTP_200_OK,
             consumer_id=consumer_id,
+            name=consumer.name,
+            lastname=consumer.lastname,
+            patronymic=consumer.patronymic,
+            email=consumer.email
         )
         return {"consumer_id": consumer_id}
     except HTTPException as e:
@@ -152,7 +168,11 @@ async def update_consumer(
             http_method="POST",
             status_code=e.status_code,
             error_message=str(e.detail),
-            consumer_id=consumer.consumer_id
+            consumer_id=consumer.consumer_id,
+            name=consumer.name,
+            lastname=consumer.lastname,
+            patronymic=consumer.patronymic,
+            email=consumer.email
         )
         raise e
     except Exception as e:
@@ -162,6 +182,10 @@ async def update_consumer(
             http_method="POST",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             error_message=str(e),
-            consumer_id=consumer.consumer_id
+            consumer_id=consumer.consumer_id,
+            name=consumer.name,
+            lastname=consumer.lastname,
+            patronymic=consumer.patronymic,
+            email=consumer.email
         )
         raise e

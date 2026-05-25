@@ -274,6 +274,10 @@ CREATE TABLE IF NOT EXISTS staging.logs(
     order_id        UUID,
     price           DECIMAL(8,2),
     count_item      INTEGER,
+    name            VARCHAR(255),
+    lastname        VARCHAR(255),
+    patronymic      VARCHAR(255),
+    email           VARCHAR(255),
     error_message   VARCHAR(255),
     status_code     INTEGER,
     load_id         UUID,
@@ -301,7 +305,7 @@ WHERE parent_table = 'staging.logs';
 
 SELECT cron.schedule(
     'partman-category',
-    '2/10 * * * *',
+    '*/10 * * * *',
     $$SELECT partman.run_maintenance();$$
 );
 

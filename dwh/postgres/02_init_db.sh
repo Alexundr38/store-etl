@@ -21,4 +21,11 @@ GRANT USAGE ON SCHEMA staging TO staging_to_raw_vault_role;
 GRANT USAGE ON SCHEMA raw_vault TO staging_to_raw_vault_role;
 CREATE USER ${DWH_STAGING_TO_RAW_VAULT_USER} WITH LOGIN PASSWORD '${DWH_STAGING_TO_RAW_VAULT_PASSWORD}';
 GRANT staging_to_raw_vault_role TO ${DWH_STAGING_TO_RAW_VAULT_USER};
+
+
+CREATE ROLE raw_vault_to_data_mart_role;
+GRANT SELECT ON ALL TABLES IN SCHEMA raw_vault TO raw_vault_to_data_mart_role;
+GRANT USAGE ON SCHEMA raw_vault TO raw_vault_to_data_mart_role;
+CREATE USER ${DWH_PG_RAW_VAULT_TO_DATA_MART_USER} WITH LOGIN PASSWORD '${DWH_PG_RAW_VAULT_TO_DATA_MART_PASSWORD}';
+GRANT raw_vault_to_data_mart_role TO ${DWH_PG_RAW_VAULT_TO_DATA_MART_USER};
 EOSQL

@@ -4,14 +4,12 @@ CREATE TABLE dm_common.dim_consumer(
     dim_consumer_id UInt64,
     name String,
     lastname String,
-    patronymic String,
+    patronymic Nullable(String),
     email String,
     create_dt DateTime,
     valid_from DateTime,
-    valid_to Nullable(DateTime),
     hub_consumer_hash_key UUID,
     consumer_id UUID,
-    is_current BOOLEAN
 ) engine = MergeTree()
 ORDER BY dim_consumer_id
 SETTINGS index_granularity = 8192;
@@ -23,6 +21,7 @@ CREATE TABLE dm_consumer_change.fact_consumer_change(
     fact_consumer_change_id UInt64,
     dim_consumer_id UInt64,
     changes_type LowCardinality(String),
+    change_dt DateTime,
     load_dt DateTime
 ) engine MergeTree()
 ORDER BY fact_consumer_change_id
@@ -35,7 +34,8 @@ CREATE TABLE dm_order_item.dim_item(
     dim_item_id UInt64,
     name String,
     price DECIMAL(8,2),
-    hub_item_hash_key UUID
+    hub_item_hash_key UUID,
+    load_dt DateTime
 ) engine = MergeTree()
 ORDER BY dim_item_id
 SETTINGS index_granularity = 8192;
@@ -44,7 +44,8 @@ CREATE TABLE dm_order_item.dim_store(
     dim_store_id UInt64,
     name String,
     address String,
-    hub_store_hash_key UUID
+    hub_store_hash_key UUID,
+    load_dt DateTime
 ) engine MergeTree()
 ORDER BY dim_store_id
 SETTINGS index_granularity = 8192;

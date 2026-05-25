@@ -13,7 +13,7 @@ down-backend:
 	docker compose -f backend/docker-compose.yml --env-file .env down
 
 down-backend-v:
-	docker compose -f backend/docker-compose.yml --env-file .env down
+	docker compose -f backend/docker-compose.yml --env-file .env down -v
 
 down-airflow:
 	docker compose -f airflow/docker-compose.yml --env-file .env down

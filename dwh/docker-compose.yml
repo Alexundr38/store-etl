@@ -1,6 +1,7 @@
 services:
   dwh-postgres:
     build: ./postgres
+    container_name: dwh-postgres
     command: >
       postgres
       -c shared_preload_libraries=pg_cron
@@ -13,6 +14,8 @@ services:
       DWH_LOAD_STAGING_PASSWORD: ${DWH_LOAD_STAGING_PASSWORD}
       DWH_STAGING_TO_RAW_VAULT_USER: ${DWH_STAGING_TO_RAW_VAULT_USER}
       DWH_STAGING_TO_RAW_VAULT_PASSWORD: ${DWH_STAGING_TO_RAW_VAULT_PASSWORD}
+      DWH_PG_RAW_VAULT_TO_DATA_MART_USER: ${DWH_PG_RAW_VAULT_TO_DATA_MART_USER}
+      DWH_PG_RAW_VAULT_TO_DATA_MART_PASSWORD: ${DWH_PG_RAW_VAULT_TO_DATA_MART_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql
     networks:
@@ -27,17 +30,21 @@ services:
 
   dwh-clickhouse:
     image: clickhouse/clickhouse-server:25.1.2.3
+    container_name: dwh-clickhouse
     environment:
       CLICKHOUSE_USER: ${DWH_CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${DWH_CLICKHOUSE_PASSWORD}
       CLICKHOUSE_DB: ${DWH_CLICKHOUSE_DB}
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: ${DWH_CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT}
+      DWH_CH_RAW_VAULT_TO_DATA_MART_USER: ${DWH_CH_RAW_VAULT_TO_DATA_MART_USER}
+      DWH_CH_RAW_VAULT_TO_DATA_MART_PASSWORD: ${DWH_CH_RAW_VAULT_TO_DATA_MART_PASSWORD}
     ports:
       - "127.0.0.1:${LOCAL_CLICKHOUSE_DWH_HTTP_PORT}:${DWH_CLICKHOUSE_HTTP_PORT}"
       - "127.0.0.1:${LOCAL_CLICKHOUSE_DWH_APPLICATION_PORT}:${DWH_CLICKHOUSE_APPLICATION_PORT}"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - ./clickhouse/01_init_db.sql:/docker-entrypoint-initdb.d/01_init_db.sql
+      - ./clickhouse/02_init_db.sh:/docker-entrypoint-initdb.d/02_init_db.sh
     networks:
       - etl_store_network
     healthcheck:

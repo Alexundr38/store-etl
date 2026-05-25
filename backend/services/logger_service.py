@@ -85,9 +85,12 @@ class ClickHouseLogger:
     async def log_event(self, event_type: str, endpoint: str, http_method: str,
                         consumer_id: Optional[Union[UUID, str]] = None, item_id: Optional[Union[UUID, str]] = None,
                         category_id: Optional[Union[UUID, str]] = None, store_id: Optional[Union[UUID, str]] = None,
-                        order_id: Optional[Union[UUID, str]] = None,price: Optional[float] = None,
+                        order_id: Optional[Union[UUID, str]] = None, price: Optional[float] = None,
+                        name: Optional[str] = None, lastname: Optional[str] = None,
+                        patronymic: Optional[str] = None, email: Optional[str] = None,
                         count_item: Optional[int] = None, error_message: Optional[str] = None,
-                        status_code: Optional[int] = None, duration_ms: Optional[int] = None):
+                        status_code: Optional[int] = None, duration_ms: Optional[int] = None,
+                        ):
         record = {
             "event_time": datetime.now(),
             "duration_ms": int(duration_ms) if duration_ms else None,
@@ -100,6 +103,10 @@ class ClickHouseLogger:
             "store_id": str(store_id) if store_id else None,
             "order_id": str(order_id) if order_id else None,
             "price": float(price) if price is not None else None,
+            "name": str(name) if name else None,
+            "lastname": str(lastname) if lastname else None,
+            "patronymic": str(patronymic) if patronymic else None,
+            "email": str(email) if email else None,
             "count_item": count_item,
             "error_message": error_message,
             "status_code": status_code,

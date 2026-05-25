@@ -5,6 +5,22 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 import hashlib
 from typing import List, Union, Optional, Tuple
 
+def get_last_load_dt(table_name: str, table_schema: str, conn_id: str):
+    dwh_hook = PostgresHook(postgres_conn_id=conn_id)
+    connection = dwh_hook.get_conn()
+    cursor = connection.cursor()
+    select_sql = f"""
+        SELECT
+            max(load_dt) AS load_dt
+        FROM {table_schema}.{table_name}
+    """
+    cursor.execute(select_sql)
+    row = cursor.fetchone()
+    last_load_dt = row[0] if row else None
+    if last_load_dt:
+        return last_load_dt
+    return datetime(1970,1,1)
+
 
 def compute_hash_key(id: Union[Tuple[str], str]) -> str:
     if isinstance(id, str):
@@ -50,14 +66,16 @@ def transfer_to_raw_vault_from_staging_dag():
         cursor = connection.cursor()
 
         try:
+            last_load_dt = get_last_load_dt(target_table, target_schema, conn_id)
             select_sql = f"""
                 SELECT
                     {business_key_col},
                     {source_system_col}
                 FROM
                     {source_schema}.{source_table}
+                WHERE load_dt > %(last_dt)s
             """
-            cursor.execute(select_sql)
+            cursor.execute(query=select_sql, vars={"last_dt": last_load_dt})
 
             staging_rows = cursor.fetchall()
             print(f'Selected {len(staging_rows)} rows from {source_schema}.{source_table}')
@@ -105,6 +123,7 @@ def transfer_to_raw_vault_from_staging_dag():
             columns_name = ', '.join(needed_cols)
             count_columns = len(needed_cols)
 
+            last_load_dt = get_last_load_dt(target_table, target_schema, conn_id)
             select_sql = f"""
                 SELECT
                     {business_key_col},
@@ -112,8 +131,9 @@ def transfer_to_raw_vault_from_staging_dag():
                     {source_system_col}
                 FROM
                     {source_schema}.{source_table}
+                WHERE load_dt > %(last_dt)s
             """
-            cursor.execute(select_sql)
+            cursor.execute(query=select_sql, vars={"last_dt": last_load_dt})
 
             staging_rows = cursor.fetchall()
             print(f'Selected {len(staging_rows)} rows from {source_schema}.{source_table}')
@@ -140,7 +160,7 @@ def transfer_to_raw_vault_from_staging_dag():
             connection.close()
 
     @task
-    def load_sat_from_hub_with_update_dt(
+    def load_sat_from_hub_with_update_dt_log(
             load_dt: str,
             source_table: str,
             source_schema: str,
@@ -151,25 +171,33 @@ def transfer_to_raw_vault_from_staging_dag():
             needed_cols: List[str],
             source_system_col: str,
             update_dt_col: str,
-            conn_id: str
+            conn_id: str,
+            join_clause: str,
+            where_clause: str
     ):
         dwh_hook = PostgresHook(postgres_conn_id=conn_id)
         connection = dwh_hook.get_conn()
         cursor = connection.cursor()
         try:
-            columns_name = ', '.join(needed_cols)
+            columns_name = ', '.join([name[name.find('.') + 1 :] for name in needed_cols])
+            select_columns_name = ', '.join(needed_cols)
             count_columns = len(needed_cols)
 
+            last_load_dt = get_last_load_dt(target_table, target_schema, conn_id)
             select_sql = f"""
                 SELECT
-                    {business_key_col},
-                    {source_system_col},
-                    {update_dt_col},
-                    {columns_name}
+                    t.{business_key_col},
+                    t.{source_system_col},
+                    t.{update_dt_col},
+                    {select_columns_name}
                 FROM
-                    {source_schema}.{source_table}
+                    {source_schema}.{source_table} t
+                {join_clause}
+                WHERE
+                    t.load_dt > %(last_dt)s AND 
+                    {where_clause}
             """
-            cursor.execute(select_sql)
+            cursor.execute(query=select_sql, vars={"last_dt": last_load_dt})
 
             staging_rows = cursor.fetchall()
             print(f"Selected {len(staging_rows)} rows from {source_schema}.{source_table}")
@@ -221,6 +249,7 @@ def transfer_to_raw_vault_from_staging_dag():
             count_columns = len(needed_cols)
             count_business_columns = len(business_key_cols)
 
+            last_load_dt = get_last_load_dt(target_table, target_schema, conn_id)
             select_sql = f"""
                     SELECT
                         {business_column_names},
@@ -228,8 +257,10 @@ def transfer_to_raw_vault_from_staging_dag():
                         {source_system_col}
                     FROM
                         {source_schema}.{source_table}
+                    WHERE
+                        load_dt > %(last_dt)s
                 """
-            cursor.execute(select_sql)
+            cursor.execute(query=select_sql, vars={"last_dt": last_load_dt})
 
             staging_rows = cursor.fetchall()
             print(f'Selected {len(staging_rows)} rows from {source_schema}.{source_table}')
@@ -280,6 +311,7 @@ def transfer_to_raw_vault_from_staging_dag():
             count_columns = len(needed_cols)
             count_business_columns = len(business_key_cols)
 
+            last_load_dt = get_last_load_dt(target_table, target_schema, conn_id)
             if where_clause:
                 select_sql = f"""
                     SELECT
@@ -291,6 +323,7 @@ def transfer_to_raw_vault_from_staging_dag():
                     FROM
                         {source_schema}.{source_table}
                     WHERE
+                        load_dt > %(last_dt)s AND 
                         {where_clause}
                 """
             else:
@@ -303,8 +336,9 @@ def transfer_to_raw_vault_from_staging_dag():
                         {source_system_col}
                     FROM
                         {source_schema}.{source_table}
+                    WHERE load_dt > %(last_dt)s
                 """
-            cursor.execute(select_sql)
+            cursor.execute(query=select_sql, vars={"last_dt": last_load_dt})
 
             staging_rows = cursor.fetchall()
             print(f'Selected {len(staging_rows)} rows from {source_schema}.{source_table}')
@@ -360,14 +394,17 @@ def transfer_to_raw_vault_from_staging_dag():
             hash_column_names = ', '.join(hash_key_cols)
             count_columns = len(business_key_cols)
 
+            last_load_dt = get_last_load_dt(target_table, target_schema, conn_id)
             select_sql = f"""
                 SELECT 
                     {business_column_names},
                     {source_system_col}
                 FROM
                     {source_schema}.{source_table}
+                WHERE
+                    load_dt > %(last_dt)s
             """
-            cursor.execute(select_sql)
+            cursor.execute(query=select_sql, vars={"last_dt": last_load_dt})
             staging_rows = cursor.fetchall()
             print(f"Selected {len(staging_rows)} rows from {source_schema}.{source_table}")
 
@@ -415,6 +452,7 @@ def transfer_to_raw_vault_from_staging_dag():
             hash_column_names = ', '.join(hash_key_cols)
             count_columns = len(business_key_cols)
 
+            last_load_dt = get_last_load_dt(target_table, target_schema, conn_id)
             if where_clause:
                 select_sql = f"""
                     SELECT 
@@ -423,6 +461,7 @@ def transfer_to_raw_vault_from_staging_dag():
                     FROM
                         {source_schema}.{source_table}
                     WHERE
+                        load_dt > %(last_dt)s AND
                         {where_clause}
                 """
             else:
@@ -432,8 +471,10 @@ def transfer_to_raw_vault_from_staging_dag():
                         {source_system_col}
                     FROM
                         {source_schema}.{source_table}
+                    WHERE
+                        load_dt > %(last_dt)s
                 """
-            cursor.execute(select_sql)
+            cursor.execute(query=select_sql, vars={"last_dt": last_load_dt})
             staging_rows = cursor.fetchall()
             print(f"Selected {len(staging_rows)} rows from {source_schema}.{source_table}")
 
@@ -580,18 +621,20 @@ def transfer_to_raw_vault_from_staging_dag():
             conn_id='dwh_postgres_staging_to_raw_vault_transfer'
         )
 
-        load_sat_from_hub_with_update_dt.override(task_id='load_sat_consumer')(
+        load_sat_from_hub_with_update_dt_log.override(task_id='load_sat_consumer')(
             load_dt=load_dt,
-            source_table='consumer',
+            source_table='logs',
             source_schema='staging',
             target_table='sat_consumer',
             target_schema='raw_vault',
             business_key_col='consumer_id',
             hash_key_col='hub_consumer_hash_key',
-            needed_cols=['name', 'lastname', 'patronymic', 'email', 'create_dt'],
-            update_dt_col='update_dt',
+            needed_cols=['t.name', 't.lastname', 't.patronymic', 't.email', 'c.create_dt'],
+            update_dt_col='event_time',
             source_system_col='source_system',
-            conn_id='dwh_postgres_staging_to_raw_vault_transfer'
+            conn_id='dwh_postgres_staging_to_raw_vault_transfer',
+            join_clause=' JOIN staging.consumer c USING (consumer_id) ',
+            where_clause="event_type IN ('consumer_created', 'consumer_update')"
         )
 
         load_sat_from_link.override(task_id='load_sat_order_item')(
@@ -608,18 +651,18 @@ def transfer_to_raw_vault_from_staging_dag():
         )
 
         load_sat_consumer_item.override(task_id='load_sat_consumer_item')(
-                load_dt=load_dt,
-                source_table='logs',
-                source_schema='staging',
-                target_table='sat_consumer_item',
-                target_schema='raw_vault',
-                business_key_cols=['consumer_id', 'item_id'],
-                hash_key_col='link_consumer_item_hash_key',
-                needed_cols=['count_item'],
-                source_system_col='source_system',
-                update_dt_col='event_time',
-                conn_id='dwh_postgres_staging_to_raw_vault_transfer',
-                where_clause="event_type IN ('delete_cart_item', 'add_item')"
+            load_dt=load_dt,
+            source_table='logs',
+            source_schema='staging',
+            target_table='sat_consumer_item',
+            target_schema='raw_vault',
+            business_key_cols=['consumer_id', 'item_id'],
+            hash_key_col='link_consumer_item_hash_key',
+            needed_cols=['count_item'],
+            source_system_col='source_system',
+            update_dt_col='event_time',
+            conn_id='dwh_postgres_staging_to_raw_vault_transfer',
+            where_clause="event_type IN ('delete_cart_item', 'add_item')"
         )
 
 
