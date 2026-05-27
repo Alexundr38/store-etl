@@ -65,3 +65,64 @@ CREATE TABLE dm_order_item.fact_order_item(
 ) engine MergeTree()
 ORDER BY fact_order_item_id
 SETTINGS index_granularity = 8192;
+
+
+
+CREATE DATABASE info_mart;
+
+CREATE TABLE info_mart.consumer_info(
+    time_start_interval DateTime,
+    dim_consumer_id UUID,
+    total_quantity UInt8,
+    total_amount DECIMAL(8,2),
+    avg_amount DECIMAL(8,2),
+    total_order UInt8,
+    unique_item UInt8
+) engine = ReplacingMergeTree()
+ORDER BY (time_start_interval, dim_consumer_id)
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE info_mart.store_info(
+    time_start_interval DateTime,
+    dim_store_id UUID,
+    total_quantity UInt8,
+    total_amount DECIMAL(8,2),
+    avg_amount DECIMAL(8,2),
+    total_order UInt8,
+    unique_item UInt8
+) engine = ReplacingMergeTree()
+ORDER BY (time_start_interval, dim_store_id)
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE info_mart.item_info(
+    time_start_interval DateTime,
+    dim_item_id UUID,
+    total_quantity UInt8,
+    total_amount DECIMAL(8,2),
+    total_order UInt8,
+    unique_consumer UInt8,
+    unique_store UInt8
+) engine = ReplacingMergeTree()
+ORDER BY (time_start_interval, dim_item_id)
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE info_mart.order_info(
+    time_start_interval DateTime,
+    total_quantity UInt8,
+    total_amount DECIMAL(8,2),
+    avg_amount DECIMAL(8,2),
+    unique_consumer UInt8,
+    unique_store UInt8,
+    total_order UInt8
+) engine = ReplacingMergeTree()
+ORDER BY time_start_interval
+SETTINGS index_granularity = 8192;
+
+CREATE TABLE info_mart.consumer_update_info(
+    time_start_interval DateTime,
+    total_create UInt8,
+    total_update UInt8,
+    unique_updated_consumer UInt8
+) engine = ReplacingMergeTree()
+ORDER BY time_start_interval
+SETTINGS index_granularity = 8192;
