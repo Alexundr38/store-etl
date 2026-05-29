@@ -182,7 +182,7 @@ def transfer_to_order_item_mart_dag():
         insert_sql = """
                      INSERT INTO dm_order_item.fact_order_item
                      (fact_order_item_id, link_order_item_hash_key, order_dt, order_id, count_item, 
-                      price_item, amount, load_dt, dim_item_id, dim_store_id, dim_consumer_id)
+                      price_item, amount, load_dt, dim_item_id, dim_consumer_id, dim_store_id)
                      SELECT tmp.fact_order_item_id, 
                             tmp.link_order_item_hash_key,
                             tmp.order_dt,

@@ -32,7 +32,7 @@ def build_table_tasks_with_dt(table_name: str, source_schema:str,
         if result:
             last_time = result[0]
         else:
-            last_time = datetime.now() - timedelta(minutes=10)
+            last_time = datetime.now() - timedelta(hours=10)
         print(f'last time etl_dt for {table_name} was {last_time}')
         return last_time
 

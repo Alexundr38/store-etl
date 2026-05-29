@@ -72,38 +72,38 @@ CREATE DATABASE info_mart;
 
 CREATE TABLE info_mart.consumer_info(
     time_start_interval DateTime,
-    dim_consumer_id UUID,
+    consumer_id UUID,
     total_quantity UInt8,
     total_amount DECIMAL(8,2),
     avg_amount DECIMAL(8,2),
     total_order UInt8,
     unique_item UInt8
 ) engine = ReplacingMergeTree()
-ORDER BY (time_start_interval, dim_consumer_id)
+ORDER BY (time_start_interval, consumer_id)
 SETTINGS index_granularity = 8192;
 
 CREATE TABLE info_mart.store_info(
     time_start_interval DateTime,
-    dim_store_id UUID,
+    store_id UUID,
     total_quantity UInt8,
     total_amount DECIMAL(8,2),
     avg_amount DECIMAL(8,2),
     total_order UInt8,
     unique_item UInt8
 ) engine = ReplacingMergeTree()
-ORDER BY (time_start_interval, dim_store_id)
+ORDER BY (time_start_interval, store_id)
 SETTINGS index_granularity = 8192;
 
 CREATE TABLE info_mart.item_info(
     time_start_interval DateTime,
-    dim_item_id UUID,
+    item_id UUID,
     total_quantity UInt8,
     total_amount DECIMAL(8,2),
     total_order UInt8,
     unique_consumer UInt8,
     unique_store UInt8
 ) engine = ReplacingMergeTree()
-ORDER BY (time_start_interval, dim_item_id)
+ORDER BY (time_start_interval, item_id)
 SETTINGS index_granularity = 8192;
 
 CREATE TABLE info_mart.order_info(
