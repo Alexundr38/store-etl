@@ -40,6 +40,8 @@ services:
       DWH_CH_RAW_VAULT_TO_DATA_MART_PASSWORD: ${DWH_CH_RAW_VAULT_TO_DATA_MART_PASSWORD}
       DWH_DATA_MART_TO_INFO_MART_USER: ${DWH_DATA_MART_TO_INFO_MART_USER}
       DWH_DATA_MART_TO_INFO_MART_PASSWORD: ${DWH_DATA_MART_TO_INFO_MART_PASSWORD}
+      DWH_INFO_MART_TO_SUPERSET_USER: ${DWH_INFO_MART_TO_SUPERSET_USER}
+      DWH_INFO_MART_TO_SUPERSET_PASSWORD: ${DWH_INFO_MART_TO_SUPERSET_PASSWORD}
     ports:
       - "127.0.0.1:${LOCAL_CLICKHOUSE_DWH_HTTP_PORT}:${DWH_CLICKHOUSE_HTTP_PORT}"
       - "127.0.0.1:${LOCAL_CLICKHOUSE_DWH_APPLICATION_PORT}:${DWH_CLICKHOUSE_APPLICATION_PORT}"
@@ -49,6 +51,7 @@ services:
       - ./clickhouse/02_init_db.sh:/docker-entrypoint-initdb.d/02_init_db.sh
     networks:
       - etl_store_network
+      - info_mart_network
     healthcheck:
       test: ["CMD", "clickhouse", "client", "-q", "SELECT 1"]
       interval: 10s
@@ -64,3 +67,6 @@ networks:
   etl_store_network:
     external: true
     name: etl_store_network
+  info_mart_network:
+    external: true
+    name: info_mart_network

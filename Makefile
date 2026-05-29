@@ -1,4 +1,4 @@
-.PHONY: up-backend up-airflow up-dwh down-backend down-backend-v down-airflow down-airflow-v down-dwh down-dwh-v
+.PHONY: up-backend up-airflow up-dwh up-superset down-backend down-backend-v down-airflow down-airflow-v down-dwh down-dwh-v down-superset down-superset-v
 
 up-backend:
 	docker compose -f backend/docker-compose.yml --env-file .env up --build -d
@@ -8,6 +8,9 @@ up-airflow:
 
 up-dwh:
 	docker compose -f dwh/docker-compose.yml --env-file .env up --build -d
+
+up-superset:
+	docker compose -f superset/docker-compose.yml --env-file .env up --build -d
 
 down-backend:
 	docker compose -f backend/docker-compose.yml --env-file .env down
@@ -26,3 +29,9 @@ down-dwh:
 
 down-dwh-v:
 	docker compose -f dwh/docker-compose.yml --env-file .env down -v
+
+down-superset:
+	docker compose -f superset/docker-compose.yml --env-file .env down
+
+down-superset-v:
+	docker compose -f superset/docker-compose.yml --env-file .env down -v

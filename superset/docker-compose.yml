@@ -1,0 +1,111 @@
+x-superset-build: &superset-build
+  build: .   # использует наш Dockerfile с clickhouse-connect
+
+x-superset-env: &superset-env
+  SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+  DATABASE_HOST: superset_db
+  DATABASE_PORT: ${SUPERSET_POSTGRES_PORT}
+  DATABASE_DB: ${SUPERSET_POSTGRES_DB}
+  DATABASE_USER: ${SUPERSET_POSTGRES_USER}
+  DATABASE_PASSWORD: ${SUPERSET_POSTGRES_PASSWORD}
+  REDIS_HOST: superset_redis
+  REDIS_PORT: ${SUPERSET_REDIS_PORT}
+  SUPERSET_ADMIN_USERNAME: ${SUPERSET_ADMIN_USERNAME}
+  SUPERSET_ADMIN_FIRSTNAME: ${SUPERSET_ADMIN_FIRSTNAME}
+  SUPERSET_ADMIN_LASTNAME: ${SUPERSET_ADMIN_LASTNAME}
+  SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL}
+  SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD}
+
+services:
+  superset_db:
+    image: postgres:15
+    container_name: superset_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${SUPERSET_POSTGRES_DB}
+      POSTGRES_USER: ${SUPERSET_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${SUPERSET_POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  superset_redis:
+    image: redis:7
+    container_name: superset_cache
+    restart: unless-stopped
+
+  # Инициализация Superset (однократная)
+  superset-init:
+    <<: *superset-build
+    container_name: superset_init
+    depends_on:
+      - superset_db
+      - superset_redis
+    environment: *superset-env
+    command: >
+      /bin/sh -c "
+      superset db upgrade &&
+      superset fab create-admin --username $${SUPERSET_ADMIN_USERNAME} --firstname $${SUPERSET_ADMIN_FIRSTNAME} --lastname $${SUPERSET_ADMIN_LASTNAME} --email $${SUPERSET_ADMIN_EMAIL} --password $${SUPERSET_ADMIN_PASSWORD} &&
+      superset init
+      "
+    volumes:
+      - superset_home:/app/superset_home
+    networks:
+      - info_mart_network   # если понадобится при инициализации
+    healthcheck:
+      disable: true
+
+  # Основной веб-сервер
+  superset:
+    <<: *superset-build
+    container_name: superset_app
+    restart: unless-stopped
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:${LOCAL_SUPERSET_PORT}:${SUPERSET_PORT}"
+    environment: *superset-env
+    volumes:
+      - superset_home:/app/superset_home
+    command: ["gunicorn", "--bind", "0.0.0.0:${SUPERSET_PORT}", "--workers", "4", "--timeout", "120", "superset.app:create_app()"]
+    networks:
+      - info_mart_network
+
+  # Celery worker
+  superset-worker:
+    <<: *superset-build
+    container_name: superset_worker
+    restart: unless-stopped
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+    environment: *superset-env
+    command: ["celery", "-A", "superset.tasks.celery_app:app", "worker", "--loglevel=info"]
+    volumes:
+      - superset_home:/app/superset_home
+    networks:
+      - info_mart_network
+
+  # Celery beat
+  superset-beat:
+    <<: *superset-build
+    container_name: superset_beat
+    restart: unless-stopped
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+    environment: *superset-env
+    command: ["celery", "-A", "superset.tasks.celery_app:app", "beat", "--loglevel=info"]
+    volumes:
+      - superset_home:/app/superset_home
+    networks:
+      - info_mart_network
+
+volumes:
+  db_data:
+  superset_home:
+
+networks:
+  info_mart_network:
+    external: true
+    name: info_mart_network

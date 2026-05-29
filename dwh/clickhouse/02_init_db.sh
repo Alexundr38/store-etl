@@ -18,4 +18,9 @@ GRANT SELECT ON dm_consumer_change.* TO data_mart_to_info_mart_role;
 GRANT SELECT ON dm_order_item.* TO data_mart_to_info_mart_role;
 CREATE USER IF NOT EXISTS $DWH_DATA_MART_TO_INFO_MART_USER IDENTIFIED WITH sha256_password BY '$DWH_DATA_MART_TO_INFO_MART_PASSWORD';
 GRANT data_mart_to_info_mart_role TO $DWH_DATA_MART_TO_INFO_MART_USER;
+
+CREATE ROLE IF NOT EXISTS info_mart_to_superset_role;
+GRANT SELECT ON info_mart.* TO info_mart_to_superset_role;
+CREATE USER IF NOT EXISTS $DWH_INFO_MART_TO_SUPERSET_USER IDENTIFIED WITH sha256_password BY '$DWH_INFO_MART_TO_SUPERSET_PASSWORD';
+GRANT info_mart_to_superset_role TO $DWH_INFO_MART_TO_SUPERSET_USER;
 EOSQL
