@@ -9,7 +9,7 @@
 - **Источник**: бэкенд на FastAPI с логированием в ClickHouse.
 - **Staging**: PostgreSQL с партиционированием через `pg_partman`.
 - **Raw Vault**: PostgreSQL, реализация Data Vault 2.0 (хабы, линки, сателлиты).
-- **Data Mart**: ClickHouse, построена по схеме "звезда".
+- **Data Mart**: ClickHouse, построены по схеме "Звезда".
 - **Info Mart**: ClickHouse, витрины данных.
 - **Оркестрация**: Airflow DAG для:
   - Ботов (имитация действий пользователей).
