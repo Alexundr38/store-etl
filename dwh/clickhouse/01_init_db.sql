@@ -11,7 +11,7 @@ CREATE TABLE dm_common.dim_consumer(
     hub_consumer_hash_key UUID,
     consumer_id UUID,
 ) engine = MergeTree()
-ORDER BY dim_consumer_id
+ORDER BY (create_dt, valid_from, dim_consumer_id)
 SETTINGS index_granularity = 8192;
 
 
@@ -24,7 +24,7 @@ CREATE TABLE dm_consumer_change.fact_consumer_change(
     change_dt DateTime,
     load_dt DateTime
 ) engine MergeTree()
-ORDER BY fact_consumer_change_id
+ORDER BY (change_dt, fact_consumer_change_id)
 SETTINGS index_granularity = 8192;
 
 
@@ -63,7 +63,7 @@ CREATE TABLE dm_order_item.fact_order_item(
     link_order_item_hash_key UUID,
     order_id UUID
 ) engine MergeTree()
-ORDER BY fact_order_item_id
+ORDER BY (fact_order_item_id, order_dt)
 SETTINGS index_granularity = 8192;
 
 
@@ -84,26 +84,28 @@ SETTINGS index_granularity = 8192;
 
 CREATE TABLE info_mart.store_info(
     time_start_interval DateTime,
-    store_id UUID,
+    dim_store_id UInt8,
+    name String,
     total_quantity UInt8,
     total_amount DECIMAL(8,2),
     avg_amount DECIMAL(8,2),
     total_order UInt8,
     unique_item UInt8
 ) engine = ReplacingMergeTree()
-ORDER BY (time_start_interval, store_id)
+ORDER BY (time_start_interval, dim_store_id)
 SETTINGS index_granularity = 8192;
 
 CREATE TABLE info_mart.item_info(
     time_start_interval DateTime,
-    item_id UUID,
+    dim_item_id UUID,
+    name String,
     total_quantity UInt8,
     total_amount DECIMAL(8,2),
     total_order UInt8,
     unique_consumer UInt8,
     unique_store UInt8
 ) engine = ReplacingMergeTree()
-ORDER BY (time_start_interval, item_id)
+ORDER BY (time_start_interval, dim_item_id)
 SETTINGS index_granularity = 8192;
 
 CREATE TABLE info_mart.order_info(
