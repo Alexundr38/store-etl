@@ -19,8 +19,8 @@ def transfer_to_order_item_mart_dag():
     @task
     def get_last_seq_id(column_name: str, db_name: str, table_name: str):
         dwh_ch_hook = ClickHouseHook(clickhouse_conn_id="dwh_clickhouse_raw_vault_to_data_mart")
-        client = dwh_ch_hook.get_conn()
-        max_id = client.execute(
+        connection = dwh_ch_hook.get_conn()
+        max_id = connection.execute(
             f"""
                 SELECT MAX(`{column_name}`) AS `{column_name}`
                 FROM `{db_name}`.`{table_name}`
@@ -34,8 +34,8 @@ def transfer_to_order_item_mart_dag():
     @task
     def get_last_dt(column_name: str, db_name: str, table_name: str):
         dwh_ch_hook = ClickHouseHook(clickhouse_conn_id="dwh_clickhouse_raw_vault_to_data_mart")
-        client = dwh_ch_hook.get_conn()
-        last_dt = client.execute(
+        connection = dwh_ch_hook.get_conn()
+        last_dt = connection.execute(
             f"""
                 SELECT MAX(`{column_name}`) AS last_dt
                 FROM `{db_name}`.`{table_name}`
@@ -89,8 +89,8 @@ def transfer_to_order_item_mart_dag():
             INSERT INTO `{target_db_name}`.`{target_table_name}` ({', '.join(insert_columns)})
             VALUES 
         """
-        client = dwh_ch_hook.get_conn()
-        client.execute(insert_sql, data)
+        connection = dwh_ch_hook.get_conn()
+        connection.execute(insert_sql, data)
         print(f"Inserted {len(pg_data)} rows")
 
 
@@ -133,9 +133,9 @@ def transfer_to_order_item_mart_dag():
         pg_data['fact_order_item_id'] = range(last_seq_id + 1, last_seq_id + len(pg_data) + 1)
 
         print(pg_data.iloc[0])
-        client = dwh_ch_hook.get_conn()
+        connection = dwh_ch_hook.get_conn()
 
-        client.execute("""
+        connection.execute("""
             CREATE TEMPORARY TABLE tmp_order_item(
                 fact_order_item_id UInt64,
                 link_order_item_hash_key UUID,
@@ -167,7 +167,7 @@ def transfer_to_order_item_mart_dag():
                 row.hub_consumer_hash_key
             ))
 
-        client.execute(
+        connection.execute(
             """
             INSERT INTO tmp_order_item (fact_order_item_id, link_order_item_hash_key, order_dt, 
                                      order_id, count_item, price_item, amount, 
@@ -203,7 +203,7 @@ def transfer_to_order_item_mart_dag():
                                 AND tmp.order_dt >= dm_c.valid_from;
                      """
 
-        client.execute(insert_sql)
+        connection.execute(insert_sql)
 
         print(f"Inserted {len(insert_data)} rows")
 

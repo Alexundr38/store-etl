@@ -21,8 +21,8 @@ def transfer_to_consumer_change_mart_from_raw_vault_dag():
     @task(task_id="get_last_seq_id")
     def get_last_seq_id():
         dwh_ch_hook = ClickHouseHook(clickhouse_conn_id="dwh_clickhouse_raw_vault_to_data_mart")
-        client = dwh_ch_hook.get_conn()
-        max_id = client.execute(
+        connection = dwh_ch_hook.get_conn()
+        max_id = connection.execute(
             """
                 SELECT MAX(fact_consumer_change_id) AS dim_consumer_id
                 FROM dm_consumer_change.fact_consumer_change
@@ -36,8 +36,8 @@ def transfer_to_consumer_change_mart_from_raw_vault_dag():
     @task(task_id="get_last_dt")
     def get_last_dt():
         dwh_ch_hook = ClickHouseHook(clickhouse_conn_id="dwh_clickhouse_raw_vault_to_data_mart")
-        client = dwh_ch_hook.get_conn()
-        last_dt = client.execute(
+        connection = dwh_ch_hook.get_conn()
+        last_dt = connection.execute(
             """
                 SELECT MAX(change_dt) AS last_dt
                 FROM dm_consumer_change.fact_consumer_change;
@@ -80,9 +80,9 @@ def transfer_to_consumer_change_mart_from_raw_vault_dag():
         )
         pg_data['fact_consumer_change_id'] = range(last_seq_id + 1, last_seq_id + len(pg_data) + 1)
 
-        client = dwh_ch_hook.get_conn()
+        connection = dwh_ch_hook.get_conn()
 
-        client.execute("""
+        connection.execute("""
             CREATE TEMPORARY TABLE tmp_changes(
                 fact_consumer_change_id UInt64,
                 hub_consumer_hash_key UUID,
@@ -104,7 +104,7 @@ def transfer_to_consumer_change_mart_from_raw_vault_dag():
                 row.changes_type
             ))
 
-        client.execute(
+        connection.execute(
             """
             INSERT INTO tmp_changes (fact_consumer_change_id, hub_consumer_hash_key, change_dt, consumer_id, changes_type) 
             VALUES
@@ -129,7 +129,7 @@ def transfer_to_consumer_change_mart_from_raw_vault_dag():
                                                  tmp.consumer_id = dm.consumer_id
         """
 
-        client.execute(insert_sql)
+        connection.execute(insert_sql)
 
         print(f"Inserted {len(insert_data)} rows")
 

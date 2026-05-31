@@ -20,8 +20,8 @@ def transfer_to_dm_common_from_raw_vault_dag():
     @task(task_id="get_last_seq_id")
     def get_last_seq_id():
         dwh_ch_hook = ClickHouseHook(clickhouse_conn_id="dwh_clickhouse_raw_vault_to_data_mart")
-        client = dwh_ch_hook.get_conn()
-        max_id = client.execute(
+        connection = dwh_ch_hook.get_conn()
+        max_id = connection.execute(
             """
                 SELECT MAX(dim_consumer_id) AS dim_consumer_id
                 FROM dm_common.dim_consumer
@@ -35,8 +35,8 @@ def transfer_to_dm_common_from_raw_vault_dag():
     @task(task_id="get_last_dt")
     def get_last_dt():
         dwh_ch_hook = ClickHouseHook(clickhouse_conn_id="dwh_clickhouse_raw_vault_to_data_mart")
-        client = dwh_ch_hook.get_conn()
-        last_dt = client.execute(
+        connection = dwh_ch_hook.get_conn()
+        last_dt = connection.execute(
             """
                 SELECT MAX(valid_from) AS last_dt
                 FROM dm_common.dim_consumer;
@@ -93,8 +93,8 @@ def transfer_to_dm_common_from_raw_vault_dag():
                                                 valid_from, hub_consumer_hash_key, consumer_id)
             VALUES 
         """
-        client = dwh_ch_hook.get_conn()
-        client.execute(insert_sql, data)
+        connection = dwh_ch_hook.get_conn()
+        connection.execute(insert_sql, data)
         print(f"Inserted {len(pg_data)} rows")
 
     last_seq_id = get_last_seq_id()
