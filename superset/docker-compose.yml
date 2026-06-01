@@ -1,5 +1,5 @@
 x-superset-build: &superset-build
-  build: .   # использует наш Dockerfile с clickhouse-connect
+  build: .
 
 x-superset-env: &superset-env
   SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
@@ -33,7 +33,6 @@ services:
     container_name: superset_cache
     restart: unless-stopped
 
-  # Инициализация Superset (однократная)
   superset-init:
     <<: *superset-build
     container_name: superset_init
@@ -50,11 +49,10 @@ services:
     volumes:
       - superset_home:/app/superset_home
     networks:
-      - info_mart_network   # если понадобится при инициализации
+      - info_mart_network
     healthcheck:
       disable: true
 
-  # Основной веб-сервер
   superset:
     <<: *superset-build
     container_name: superset_app
@@ -71,7 +69,6 @@ services:
     networks:
       - info_mart_network
 
-  # Celery worker
   superset-worker:
     <<: *superset-build
     container_name: superset_worker
@@ -86,7 +83,6 @@ services:
     networks:
       - info_mart_network
 
-  # Celery beat
   superset-beat:
     <<: *superset-build
     container_name: superset_beat
