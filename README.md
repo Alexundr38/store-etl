@@ -20,39 +20,39 @@
 
 ### Бэкенд
 
-![backend_db.png](docs/images/backend_db.png)
+![backend_db.png](docs/images/db_schemes/backend_db.png)
 
 
 ### Логи
 
-![logs_db.png](docs/images/logs_db.png)
+![logs_db.png](docs/images/db_schemes/logs_db.png)
 
 
 ### Staging
 
-![staging_db.png](docs/images/staging_db.png)
+![staging_db.png](docs/images/db_schemes/staging_db.png)
 
 
 ### Raw Vault
 
-![raw_vault_db.png](docs/images/raw_vault_db.png)
+![raw_vault_db.png](docs/images/db_schemes/raw_vault_db.png)
 
 
 ### Data Marts
 
 **dm_common**
 
-![dm_common_db.png](docs/images/dm_common_db.png)
+![dm_common_db.png](docs/images/db_schemes/dm_common_db.png)
 
 **dm_order_item**
 
-![dm_order_item_db.png](docs/images/dm_order_item_db.png)
+![dm_order_item_db.png](docs/images/db_schemes/dm_order_item_db.png)
 
 **dm_consumer_change**
 
-![dm_consumer_change_db](docs/images/dm_consumer_change_db.png)
+![dm_consumer_change_db](docs/images/db_schemes/dm_consumer_change_db.png)
 
 
 ### Info Marts
 
-![info_mart_db.png](docs/images/info_mart_db.png)
+![info_mart_db.png](docs/images/db_schemes/info_mart_db.png)
