@@ -6,39 +6,54 @@
 
 ### Ключевые особенности
 
-- **Источник**: бэкенд на FastAPI с логированием в ClickHouse.
-- **Staging**: PostgreSQL с партиционированием через `pg_partman`.
-- **Raw Vault**: PostgreSQL, реализация Data Vault 2.0 (хабы, линки, сателлиты).
-- **Data Mart**: ClickHouse, построены по схеме "Звезда".
-- **Info Mart**: ClickHouse, витрины данных.
+- **Источник**: бэкенд на FastAPI, с бд на PostgreSQL и логированием в ClickHouse.
+- **DWH**
+  - **Staging**: PostgreSQL с партиционированием через `pg_partman`.
+  - **Raw Vault**: PostgreSQL, реализация Data Vault 2.0 (хабы, линки, сателлиты).
+  - **Data Mart**: ClickHouse, построены по схеме "Звезда".
+  - **Info Mart**: ClickHouse, витрины данных.
 - **Оркестрация**: Airflow DAG для:
   - Ботов (имитация действий пользователей).
-  - Загрузки из бэкенда в staging.
+  - Загрузки из бэкенда и логов в staging.
   - Перелива из staging в Raw Vault (инкрементально).
   - Построения витрин из Raw Vault в ClickHouse.
 - **Визуализация**: Apache Superset (дашборды на основе Info Mart).
 
-### Бэкенд
+## Бэкенд
 
 ![backend_db.png](docs/images/db_schemes/backend_db.png)
 
+Бэкенд на **FastAPI** — генератор событий. 
+Предоставляет REST API, логирует все действия в ClickHouse, данные отдаёт в Staging.
+<br><br>Позволяет:
+ - Создавать/удалять/изменять пользователей;
+ - Добавлять предметы в корзину и удалять их;
+ - Изменять количество предметов в корзине;
+ - Создавать заказы;
 
-### Логи
+### Стек
+- **FastAPI** + **Uvicorn**
+- **SQLAlchemy 2.0** (async, sync для генерации)
+- **Pydantic** + **Pydantic Settings**
+- **ClickHouse Connect** (асинхронная буферизация)
+- **Faker** (генерация начальных данных)
+
+## Логи
 
 ![logs_db.png](docs/images/db_schemes/logs_db.png)
 
 
-### Staging
+## Staging
 
 ![staging_db.png](docs/images/db_schemes/staging_db.png)
 
 
-### Raw Vault
+## Raw Vault
 
 ![raw_vault_db.png](docs/images/db_schemes/raw_vault_db.png)
 
 
-### Data Marts
+## Data Marts
 
 **dm_common**
 
@@ -53,6 +68,11 @@
 ![dm_consumer_change_db](docs/images/db_schemes/dm_consumer_change_db.png)
 
 
-### Info Marts
+## Info Marts
 
 ![info_mart_db.png](docs/images/db_schemes/info_mart_db.png)
+
+
+## ETL процессы
+
+## Дашборды
