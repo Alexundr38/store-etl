@@ -75,4 +75,8 @@
 
 ## ETL процессы
 
+### Боты
+
+![store_bot.png](docs/images/dags/store_bot.png)
+
 ## Дашборды
