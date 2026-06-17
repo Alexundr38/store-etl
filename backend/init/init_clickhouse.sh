@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS $CLICKHOUSE_DB.logs (
 ENGINE = MergeTree()
 PARTITION BY toYYYYMMDD(event_time)
 ORDER BY (event_time, event_type)
-TTL event_time + INTERVAL 10 DAY
+TTL event_time + INTERVAL 30 DAY
 SETTINGS index_granularity = 8192;
 
 CREATE ROLE IF NOT EXISTS logger_role;
