@@ -97,7 +97,7 @@ SETTINGS index_granularity = 8192;
 
 CREATE TABLE info_mart.item_info(
     time_start_interval DateTime,
-    dim_item_id UUID,
+    dim_item_id UInt64,
     name String,
     total_quantity UInt8,
     total_amount DECIMAL(8,2),
