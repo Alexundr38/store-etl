@@ -74,8 +74,8 @@ CREATE TABLE info_mart.consumer_info(
     time_start_interval DateTime,
     consumer_id UUID,
     total_quantity UInt8,
-    total_amount DECIMAL(8,2),
-    avg_amount DECIMAL(8,2),
+    total_amount DECIMAL(10,2),
+    avg_amount DECIMAL(10,2),
     total_order UInt8,
     unique_item UInt8
 ) engine = ReplacingMergeTree()
@@ -87,8 +87,8 @@ CREATE TABLE info_mart.store_info(
     dim_store_id UInt8,
     name String,
     total_quantity UInt8,
-    total_amount DECIMAL(8,2),
-    avg_amount DECIMAL(8,2),
+    total_amount DECIMAL(10,2),
+    avg_amount DECIMAL(10,2),
     total_order UInt8,
     unique_item UInt8
 ) engine = ReplacingMergeTree()
@@ -100,7 +100,7 @@ CREATE TABLE info_mart.item_info(
     dim_item_id UInt64,
     name String,
     total_quantity UInt8,
-    total_amount DECIMAL(8,2),
+    total_amount DECIMAL(10,2),
     total_order UInt8,
     unique_consumer UInt8,
     unique_store UInt8
@@ -111,8 +111,8 @@ SETTINGS index_granularity = 8192;
 CREATE TABLE info_mart.order_info(
     time_start_interval DateTime,
     total_quantity UInt8,
-    total_amount DECIMAL(8,2),
-    avg_amount DECIMAL(8,2),
+    total_amount DECIMAL(10,2),
+    avg_amount DECIMAL(10,2),
     unique_consumer UInt8,
     unique_store UInt8,
     total_order UInt8
