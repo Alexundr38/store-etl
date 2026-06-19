@@ -80,3 +80,20 @@
 ![store_bot.png](docs/images/dags/store_bot.png)
 
 ## Дашборды
+
+### Метрики магазинов
+
+![store_metrics.png](docs/images/dashboards/store_metrics.png)
+
+### Метрики товаров
+
+![item_metrics.png](docs/images/dashboards/item_metrics.jpg)
+
+### Метрики заказов
+
+![order_metrics.png](docs/images/dashboards/order_metrics.jpg)
+
+### Метрики покупателей
+
+![consumer_metrics.png](docs/images/dashboards/consumer_metrics.png)
+![consumer_metrics_change.png](docs/images/dashboards/consumer_metrics_change.png)
