@@ -30,7 +30,7 @@ def transfer_to_store_info_from_dm_order_item_dag():
         if last_time == datetime(1970, 1, 1, 0, 0, 0):
             return last_time
         else:
-            return last_time - timedelta(minutes=10)
+            return last_time - timedelta(days=1)
 
     @task(task_id='transfer_data_to_store_info')
     def transfer_data_to_store_info(last_time: datetime):

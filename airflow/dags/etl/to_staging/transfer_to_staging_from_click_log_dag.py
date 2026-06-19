@@ -30,7 +30,7 @@ def build_table_task_group(table_name: str, source_schema: str, target_schema: s
         if result:
             last_time = result[0]
         else:
-            last_time = datetime.now() - timedelta(hours=10)
+            last_time = datetime.now() - timedelta(days=1)
         print(f'last time etl_dt for {table_name} was {last_time}')
         return last_time
 
