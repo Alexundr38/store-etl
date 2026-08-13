@@ -75,9 +75,26 @@
 
 ## ETL процессы
 
-### Боты
+### Нагрузочные боты
 
 ![store_bot.png](docs/images/dags/store_bot.png)
+
+### На слой Staging
+
+![to_staging.png](/docs/images/dags/to_staging.png)
+
+
+### На слой Raw Vault
+
+![to_raw_vault.png](/docs/images/dags/to_raw_vault.png)
+
+### На слой Data Mart
+
+![to_data_mart.png](/docs/images/dags/to_data_mart.png)
+
+### На слой Info Mart
+
+![to_info_mart](/docs/images/dags/to_info_mart.png)
 
 ## Дашборды
 
