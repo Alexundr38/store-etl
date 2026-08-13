@@ -19,6 +19,8 @@
   - Построения витрин из Raw Vault в ClickHouse.
 - **Визуализация**: Apache Superset (дашборды на основе Info Mart).
 
+---
+
 ## Бэкенд
 
 ![backend_db.png](docs/images/db_schemes/backend_db.png)
@@ -38,22 +40,28 @@
 - **ClickHouse Connect** (асинхронная буферизация)
 - **Faker** (генерация начальных данных)
 
+---
+
 ## Логи
 
 ![logs_db.png](docs/images/db_schemes/logs_db.png)
 
 
-## Staging
+---
+
+## DWH
+
+### Staging
 
 ![staging_db.png](docs/images/db_schemes/staging_db.png)
 
 
-## Raw Vault
+### Raw Vault
 
 ![raw_vault_db.png](docs/images/db_schemes/raw_vault_db.png)
 
 
-## Data Marts
+### Data Marts
 
 **dm_common**
 
@@ -68,10 +76,11 @@
 ![dm_consumer_change_db](docs/images/db_schemes/dm_consumer_change_db.png)
 
 
-## Info Marts
+### Info Marts
 
 ![info_mart_db.png](docs/images/db_schemes/info_mart_db.png)
 
+---
 
 ## ETL процессы
 
@@ -96,6 +105,8 @@
 
 ![to_info_mart](/docs/images/dags/to_info_mart.png)
 
+---
+
 ## Дашборды
 
 ### Метрики магазинов
@@ -114,3 +125,19 @@
 
 ![consumer_metrics.png](docs/images/dashboards/consumer_metrics.png)
 ![consumer_metrics_change.png](docs/images/dashboards/consumer_metrics_change.png)
+
+---
+
+## Тестовый запуск
+
+Для быстрого развёртывания всех компонентов проекта предусмотрен **Makefile**.  
+Все команды используют переменные окружения из файла `.test.env`
+
+### Доступные команды
+
+| Компонент               | Запуск                     | Остановка                   | Остановка + удаление данных* |
+|-------------------------|----------------------------|-----------------------------|-------------------------------|
+| **Backend + ClickHouse (логи)** | `make up-backend`    | `make down-backend`         | `make down-backend-v`         |
+| **DWH**    | `make up-dwh`        | `make down-dwh`             | `make down-dwh-v`             |
+| **Airflow**             | `make up-airflow`    | `make down-airflow`         | `make down-airflow-v`         |
+| **Superset**            | `make up-superset`   | `make down-superset`        | `make down-superset-v`        |
