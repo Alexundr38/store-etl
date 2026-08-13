@@ -135,9 +135,9 @@
 
 ### Доступные команды
 
-| Компонент               | Запуск                     | Остановка                   | Остановка + удаление данных* |
-|-------------------------|----------------------------|-----------------------------|-------------------------------|
-| **Backend + ClickHouse (логи)** | `make up-backend`    | `make down-backend`         | `make down-backend-v`         |
-| **DWH**    | `make up-dwh`        | `make down-dwh`             | `make down-dwh-v`             |
-| **Airflow**             | `make up-airflow`    | `make down-airflow`         | `make down-airflow-v`         |
-| **Superset**            | `make up-superset`   | `make down-superset`        | `make down-superset-v`        |
+| Компонент               | Запуск                     | Остановка                   | Остановка + удаление данных |
+|-------------------------|----------------------------|-----------------------------|------------------------------|
+| **Backend + ClickHouse (логи)** | `make up-backend`    | `make down-backend`         | `make down-backend-v`        |
+| **DWH**    | `make up-dwh`        | `make down-dwh`             | `make down-dwh-v`            |
+| **Airflow**             | `make up-airflow`    | `make down-airflow`         | `make down-airflow-v`        |
+| **Superset**            | `make up-superset`   | `make down-superset`        | `make down-superset-v`       |
